@@ -19,10 +19,32 @@ namespace ARJE20250324.AppWebMVC.Controllers
         }
 
         // GET: Product
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(Product products, int topRegistro = 10)
         {
-            var test20250324DbContext = _context.Products.Include(p => p.Brand).Include(p => p.Warehouse);
-            return View(await test20250324DbContext.ToListAsync());
+            var query = _context.Products.AsQueryable();
+            if (!string.IsNullOrWhiteSpace(products.ProductName))
+                query = query.Where(s => s.ProductName.Contains(products.ProductName));
+            if (!string.IsNullOrWhiteSpace(products.Description))
+                query = query.Where(s => s.Description.Contains(products.Description));
+            if (products.Id > 0)
+                query = query.Where(s => s.Id == products.Id);
+            if (products.Id > 0)
+                query = query.Where(s => s.Id == products.Id);
+            if (topRegistro > 0)
+                query = query.Take(topRegistro);
+            query = query
+                .Include(p => p.Warehouse).Include(p => p.Brand);
+
+            var marcas = _context.Brands.ToList();
+            marcas.Add(new Brand { BrandName = "SELECCIONAR", Id = 0 });
+
+            var categorias = _context.Warehouses.ToList();
+            categorias.Add(new Warehouse { WarehouseName = "SELECCIONAR", Id = 0 });
+
+            ViewBag.bodegaId = new SelectList(categorias, "Id", "WarehouseName", 0);
+            ViewBag.marcaId = new SelectList(marcas, "Id", "BrandName", 0);
+
+            return View(await query.ToListAsync());
         }
 
         // GET: Product/Details/5
@@ -48,8 +70,8 @@ namespace ARJE20250324.AppWebMVC.Controllers
         // GET: Product/Create
         public IActionResult Create()
         {
-            ViewData["BrandId"] = new SelectList(_context.Brands, "Id", "Id");
-            ViewData["WarehouseId"] = new SelectList(_context.Warehouses, "Id", "Id");
+            ViewBag.marcaId = new SelectList(_context.Brands, "Id", "BrandName");
+            ViewBag.bodegaId = new SelectList(_context.Warehouses, "Id", "WarehouseName");
             return View();
         }
 
@@ -66,8 +88,8 @@ namespace ARJE20250324.AppWebMVC.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["BrandId"] = new SelectList(_context.Brands, "Id", "Id", product.BrandId);
-            ViewData["WarehouseId"] = new SelectList(_context.Warehouses, "Id", "Id", product.WarehouseId);
+            ViewBag["marcaId"] = new SelectList(_context.Brands, "Id", "BrandName", product.BrandId);
+            ViewData["bodegaId"] = new SelectList(_context.Warehouses, "Id", "WarehouseName", product.WarehouseId); 
             return View(product);
         }
 
@@ -84,8 +106,8 @@ namespace ARJE20250324.AppWebMVC.Controllers
             {
                 return NotFound();
             }
-            ViewData["BrandId"] = new SelectList(_context.Brands, "Id", "Id", product.BrandId);
-            ViewData["WarehouseId"] = new SelectList(_context.Warehouses, "Id", "Id", product.WarehouseId);
+            ViewData["marcaId"] = new SelectList(_context.Brands, "Id", "BrandName", product.BrandId);
+            ViewData["bodegaId"] = new SelectList(_context.Warehouses, "Id", "WarehouseName", product.WarehouseId);
             return View(product);
         }
 
@@ -121,9 +143,9 @@ namespace ARJE20250324.AppWebMVC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["BrandId"] = new SelectList(_context.Brands, "Id", "Id", product.BrandId);
-            ViewData["WarehouseId"] = new SelectList(_context.Warehouses, "Id", "Id", product.WarehouseId);
-            return View(product);
+            ViewData["marcaId"] = new SelectList(_context.Brands, "Id", "BrandName", product.BrandId);
+            ViewData["bodegaId"] = new SelectList(_context.Warehouses, "Id", "WarehouseName", product.WarehouseId);
+            return View(product);   
         }
 
         // GET: Product/Delete/5
