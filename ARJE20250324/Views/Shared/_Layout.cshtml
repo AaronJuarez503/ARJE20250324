@@ -25,6 +25,8 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+
+                      @if(User.Identity.IsAuthenticated){
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Product" asp-action="Index">Productos</a>
                         </li>
@@ -37,7 +39,18 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Index">Usuarios</a>
                         </li>
+                      }
                     </ul>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        var nombre = User.FindFirst("Username")?.Value;
+                        <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="CerrarSession">Cerrar session</a>
+                        <span>@nombre</span>
+                    }
+                    else
+                    {
+                        <a class="btn btn-outline-info" asp-area="" asp-controller="User" asp-action="Login">Iniciar session</a>
+                    }
                 </div>
             </div>
         </nav>

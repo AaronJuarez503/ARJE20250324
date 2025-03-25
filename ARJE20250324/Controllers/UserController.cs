@@ -15,6 +15,7 @@ using System.Text;
 
 namespace ARJE20250324.AppWebMVC.Controllers
 {
+    [Authorize(Roles ="ADMINISTRADOR")]
     public class UserController : Controller
     {
         private readonly Test20250324DbContext _context;
