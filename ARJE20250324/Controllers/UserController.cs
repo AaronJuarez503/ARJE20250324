@@ -6,6 +6,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ARJE20250324.AppWebMVC.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace ARJE20250324.AppWebMVC.Controllers
 {
@@ -19,9 +25,21 @@ namespace ARJE20250324.AppWebMVC.Controllers
         }
 
         // GET: User
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(User user, int topRegistro = 10)
         {
-            return View(await _context.Users.ToListAsync());
+            var query = _context.Users.AsQueryable();
+            if (!string.IsNullOrWhiteSpace(user.Username))
+                query = query.Where(s => s.Username.Contains(user.Username));
+            if (!string.IsNullOrWhiteSpace(user.Email))
+                query = query.Where(s => s.Email.Contains(user.Email));
+            if (user.Id > 0)
+                query = query.Where(s => s.Id == user.Id);
+            if (user.Id > 0)
+                query = query.Where(s => s.Id == user.Id);
+            if (topRegistro > 0)
+                query = query.Take(topRegistro);
+
+            return View(await query.ToListAsync());
         }
 
         // GET: User/Details/5
@@ -53,15 +71,53 @@ namespace ARJE20250324.AppWebMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Username,Email,Password,Role,Notes")] User user)
+        public async Task<IActionResult> Create([Bind("Id,Username,Email,Password,ConfirmarPassword,Role,Notes")] User user)
         {
             if (ModelState.IsValid)
             {
+                user.Password = CalcularHashMD5(user.Password);
                 _context.Add(user);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(user);
+        }
+        [AllowAnonymous]
+        public async Task<IActionResult> CerrarSession()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Index", "Home");
+        }
+        [AllowAnonymous]
+        public IActionResult Login()
+        {
+            return View();
+        }
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> Login(User user)
+        {
+            user.Password = CalcularHashMD5(user.Password);
+            var userAuth = await _context.
+                Users
+                .FirstOrDefaultAsync(s => s.Email == user.Email && s.Password == user.Password);
+            if (userAuth != null && userAuth.Id > 0 && userAuth.Email == user.Email)
+            {
+                var claims = new[] {
+                    new Claim(ClaimTypes.Name, userAuth.Email),
+                    new Claim("Id", userAuth.Id.ToString()),
+                    new Claim("Username", userAuth.Username),
+                    new Claim(ClaimTypes.Role, userAuth.Role)
+                    };
+                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+                return RedirectToAction("Index", "Home");
+            }
+            else
+            {
+                ModelState.AddModelError("", "El email o contraseña están incorrectos.");
+                return View();
+            }
         }
 
         // GET: User/Edit/5
@@ -85,34 +141,36 @@ namespace ARJE20250324.AppWebMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Username,Email,Password,Role,Notes")] User user)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Username,Email,Role,Notes")] User user)
         {
             if (id != user.Id)
             {
                 return NotFound();
             }
+            var usuarioUpdate = await _context.Users
+                .FirstOrDefaultAsync(m => m.Id == user.Id);
 
-            if (ModelState.IsValid)
+            try
             {
-                try
-                {
-                    _context.Update(user);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!UserExists(user.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                usuarioUpdate.Username = user.Username;
+                usuarioUpdate.Email = user.Email;
+                usuarioUpdate.Role = user.Role;
+                usuarioUpdate.Notes = user.Notes;
+                _context.Update(usuarioUpdate);
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(user);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!UserExists(user.Id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    return View(user);
+                }
+            }
         }
 
         // GET: User/Delete/5
@@ -151,6 +209,21 @@ namespace ARJE20250324.AppWebMVC.Controllers
         private bool UserExists(int id)
         {
             return _context.Users.Any(e => e.Id == id);
+        }
+        private string CalcularHashMD5(string input)
+        {
+            using (MD5 md5 = MD5.Create())
+            {
+                byte[] inputBytes = Encoding.UTF8.GetBytes(input);
+                byte[] hashBytes = md5.ComputeHash(inputBytes);
+
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < hashBytes.Length; i++)
+                {
+                    sb.Append(hashBytes[i].ToString("x2")); // "x2" convierte el byte en una cadena hexadecimal de dos caracteres.
+                }
+                return sb.ToString();
+            }
         }
     }
 }
