@@ -24,8 +24,6 @@ public partial class User
     [Required(ErrorMessage = "El Rol es obligatorio")]
     public string Role { get; set; } = null!;
 
-    public string? Notes { get; set; }
-
     [NotMapped]
     [StringLength(40, MinimumLength = 5, ErrorMessage = "La contraseña debe tener entre 5 y 50 caracteres.")]
     [Display(Name = "Confirmar Contraseña")]

@@ -72,7 +72,7 @@ namespace ARJE20250324.AppWebMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Username,Email,Password,ConfirmarPassword,Role,Notes")] User user)
+        public async Task<IActionResult> Create([Bind("Id,Username,Email,Password,ConfirmarPassword,Role")] User user)
         {
             if (ModelState.IsValid)
             {
@@ -142,7 +142,7 @@ namespace ARJE20250324.AppWebMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Username,Email,Role,Notes")] User user)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Username,Email,Role")] User user)
         {
             if (id != user.Id)
             {
@@ -156,7 +156,6 @@ namespace ARJE20250324.AppWebMVC.Controllers
                 usuarioUpdate.Username = user.Username;
                 usuarioUpdate.Email = user.Email;
                 usuarioUpdate.Role = user.Role;
-                usuarioUpdate.Notes = user.Notes;
                 _context.Update(usuarioUpdate);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));

@@ -43,7 +43,6 @@ public partial class Test20250324DbContext : DbContext
 
             entity.Property(e => e.BrandId).HasColumnName("BrandID");
             entity.Property(e => e.Description).HasColumnType("text");
-            entity.Property(e => e.Notes).HasColumnType("text");
             entity.Property(e => e.Price).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.ProductName)
                 .HasMaxLength(255)
@@ -69,7 +68,6 @@ public partial class Test20250324DbContext : DbContext
             entity.Property(e => e.Email)
                 .HasMaxLength(255)
                 .IsUnicode(false);
-            entity.Property(e => e.Notes).HasColumnType("text");
             entity.Property(e => e.Password)
                 .HasMaxLength(32)
                 .IsUnicode(false)
@@ -86,7 +84,6 @@ public partial class Test20250324DbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Warehous__3214EC074A374955");
 
-            entity.Property(e => e.Notes).HasColumnType("text");
             entity.Property(e => e.WarehouseName)
                 .HasMaxLength(255)
                 .IsUnicode(false);

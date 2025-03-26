@@ -26,8 +26,6 @@ namespace ARJE20250324.AppWebMVC.Controllers
             var query = _context.Warehouses.AsQueryable();
             if (!string.IsNullOrWhiteSpace(warehouse.WarehouseName))
                 query = query.Where(s => s.WarehouseName.Contains(warehouse.WarehouseName));
-            if (!string.IsNullOrWhiteSpace(warehouse.Notes))
-                query = query.Where(s => s.Notes.Contains(warehouse.Notes));
             if (warehouse.Id > 0)
                 query = query.Where(s => s.Id == warehouse.Id);
             if (warehouse.Id > 0)
@@ -67,7 +65,7 @@ namespace ARJE20250324.AppWebMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,WarehouseName,Notes")] Warehouse warehouse)
+        public async Task<IActionResult> Create([Bind("Id,WarehouseName")] Warehouse warehouse)
         {
             if (ModelState.IsValid)
             {
@@ -99,7 +97,7 @@ namespace ARJE20250324.AppWebMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,WarehouseName,Notes")] Warehouse warehouse)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,WarehouseName")] Warehouse warehouse)
         {
             if (id != warehouse.Id)
             {
