@@ -10,6 +10,7 @@ public partial class User
     public int Id { get; set; }
 
     [Required(ErrorMessage = "El Usuario es obligatorio")]
+    [Display(Name = "Usuario")]
     public string Username { get; set; } = null!;
 
     [Required(ErrorMessage = "El correo electrónico es obligatorio")]
@@ -19,9 +20,11 @@ public partial class User
     [StringLength(40, MinimumLength = 5, ErrorMessage = "La contraseña debe tener entre 5 y 50 caracteres.")]
     [Required(ErrorMessage = "La contraseña es obligatoria")]
     [DataType(DataType.Password)]
+    [Display(Name = "Contraseña")]
     public string Password { get; set; } = null!;
 
     [Required(ErrorMessage = "El Rol es obligatorio")]
+    [Display(Name = "Rol")]
     public string Role { get; set; } = null!;
 
     [NotMapped]
