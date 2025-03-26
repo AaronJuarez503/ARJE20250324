@@ -28,8 +28,8 @@ namespace ARJE20250324.AppWebMVC.Controllers
                 query = query.Where(s => s.ProductName.Contains(products.ProductName));
             if (!string.IsNullOrWhiteSpace(products.Description))
                 query = query.Where(s => s.Description.Contains(products.Description));
-            if (products.Id > 0)
-                query = query.Where(s => s.Id == products.Id);
+            if (products.BrandId > 0)
+                query = query.Where(s => s.BrandId == products.BrandId);
             if (products.Id > 0)
                 query = query.Where(s => s.Id == products.Id);
             if (topRegistro > 0)
